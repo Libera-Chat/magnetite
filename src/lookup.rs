@@ -40,12 +40,19 @@ impl LookupState
         Ok(false)
     }
 
-    pub async fn record(&self, nick: &str) -> Result<(), LookupError>
+    pub async fn record(&self, nick: &str) -> Result<bool, LookupError>
     {
         let index = self.hasher.index_for(nick);
-        let hash = self.hasher.create_nick_hash(nick)?;
 
-        self.db.add_hash(index, &hash).await?;
-        Ok(())
+        if self.lookup(nick).await?
+        {
+            Ok(true)
+        }
+        else
+        {
+            let hash = self.hasher.create_nick_hash(nick)?;
+            self.db.add_hash(index, &hash).await?;
+            Ok(false)
+        }
     }
 }

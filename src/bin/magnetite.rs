@@ -109,13 +109,18 @@ mod handlers
     {
         if let Ok(nick) = String::from_utf8(nick.to_vec())
         {
-            if let Ok(()) = state.record(&nick).await
+            match state.record(&nick).await
             {
-                warp::reply::with_status("", warp::http::StatusCode::OK)
-            }
-            else
-            {
-                warp::reply::with_status("", warp::http::StatusCode::INTERNAL_SERVER_ERROR)
+                Ok(result) =>
+                {
+                    let reply = if result { "true" } else { "false" };
+                    warp::reply::with_status(reply, warp::http::StatusCode::OK)
+                }
+                Err(e) =>
+                {
+                    log::error!("got lookup error {}", e);
+                    warp::reply::with_status("", warp::http::StatusCode::INTERNAL_SERVER_ERROR)
+                }
             }
         }
         else
