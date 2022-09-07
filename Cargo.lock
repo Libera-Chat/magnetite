@@ -559,6 +559,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "magnetite"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bcrypt",
+ "bytes",
+ "clap",
+ "log",
+ "pretty_env_logger",
+ "rand",
+ "siphasher",
+ "thiserror",
+ "tokio",
+ "tokio-postgres",
+ "warp",
+]
+
+[[package]]
 name = "matches"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -950,24 +968,6 @@ checksum = "b362b83898e0e69f38515b82ee15aa80636befe47c3b6d3d89a911e78fc228ce"
 dependencies = [
  "ring",
  "untrusted",
-]
-
-[[package]]
-name = "seen-nick"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bcrypt",
- "bytes",
- "clap",
- "log",
- "pretty_env_logger",
- "rand",
- "siphasher",
- "thiserror",
- "tokio",
- "tokio-postgres",
- "warp",
 ]
 
 [[package]]

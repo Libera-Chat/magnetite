@@ -3,14 +3,7 @@ use rand::RngCore;
 use warp::Filter;
 use std::sync::Arc;
 
-mod database;
-use database::*;
-
-mod hasher;
-use hasher::*;
-
-mod lookup;
-use lookup::*;
+use magnetite::*;
 
 #[derive(Debug,Parser)]
 struct Args
@@ -47,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>
 
     let routes = filters::lookup(state.clone())
                 .or(filters::record(state.clone()))
-                .with(warp::log("seen_nick"));
+                .with(warp::log("magnetite"));
 
     warp::serve(routes).run(([0,0,0,0],3000)).await;
 
