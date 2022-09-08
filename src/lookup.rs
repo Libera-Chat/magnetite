@@ -15,13 +15,18 @@ pub struct LookupState
 {
     db: Database,
     hasher: NickHasher,
+    sync_hash_creator: CacheDb<Box<str>, Option<hash>>
 }
 
 impl LookupState
 {
     pub fn new(db: Database, hasher: NickHasher) -> Self
     {
-        Self { db, hasher }
+        let sync_hash_creator = CacheDb::new().with_constructor({
+            let hasher = hasher.clone();   
+            move |nick| {Some(hasher.create_nick_hash(nick)) }
+        });
+        Self { db, hasher, sync_hash_creator }
     }
 
     pub async fn lookup(&self, nick: &str) -> Result<bool, LookupError>
@@ -50,9 +55,18 @@ impl LookupState
         }
         else
         {
-            let hash = self.hasher.create_nick_hash(nick)?;
-            self.db.add_hash(index, &hash).await?;
-            Ok(false)
+            let mut hash = self.sync_hash_creator.get_mut(Blocking, nick)?;
+            
+            if hash.is_some() {
+                // the cachedb created a hash for us, lets store it
+                self.db.add_hash(index, &hash).await?;
+                // and invalidate it!
+                hash = None;
+                Ok(false)
+            } else {
+                // we waited, and got an ivalidated hash, what now? (this means it is inserted in the db unless an error happend there..)
+                Ok(true)  // ??
+            }
         }
     }
 }
